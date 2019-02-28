@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
       <scroll ref="scroll" class="recommend-content" :data="discList">
         <div>
           <div v-if="recommends.length" class="slider-wrapper">
@@ -14,7 +14,7 @@
           <div class="recommend-list">
             <h1 class="list-title">热门歌曲推荐</h1>
             <ul>
-              <li v-for="item in discList" class="item">
+              <li @click="selectItem(item)" v-for="item in discList" class="item">
                 <div class="icon">
                   <img width="60" height="60" v-lazy="item.imgurl">
                 </div>
@@ -30,6 +30,7 @@
           <loading></loading>
         </div>
       </scroll>
+      <router-view></router-view>
   </div>
 </template>
 
@@ -39,8 +40,10 @@ import Scroll from 'base/scroll/scroll'
 import {getRecommend, getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'base/slider/slider'
+import {playlistMixin} from 'common/js/mixin'
 
 export default {
+  mixins: [playlistMixin],
   data () {
     return {
       recommends: [], // 轮播图数据
@@ -52,6 +55,16 @@ export default {
     this._getDiscList()
   },
   methods: {
+    handlePlaylist (playlist) { // 底部播放器适配
+      const bottom = playlist.length > 0 ? '60px' : ''
+      this.$refs.recommend.style.bottom = bottom
+      this.$refs.scroll.refresh()
+    },
+    selectItem (item) {
+      this.$router.push({ // 跳转到歌单详情
+        path: `/recommend/${item.dissid}`
+      })
+    },
     _getRecommend () {
       getRecommend().then((res) => {
         if (res.code === ERR_OK) {

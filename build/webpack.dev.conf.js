@@ -29,7 +29,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   // these devServer options should be customized in /config/index.js
   devServer: {
     before(apiRouter){
-      apiRouter.get('/api/getDiscList', function (req, res) {
+      apiRouter.get('/api/getDiscList', function (req, res) { // 获取歌单
         var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
 
         axios.get(url, { // 发送请求
@@ -41,6 +41,21 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         }).then((response) => {
           res.json(response.data) // 得到响应的数据
         }).catch((e) => { // 捕获错误
+          console.log(e)
+        })
+      })
+      apiRouter.get('/api/lyric', function (req, res) { // 获取歌词
+        var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((e) => {
           console.log(e)
         })
       })

@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
       <div class="play-wrapper">
-        <div class="play" v-show="songs.length > 0" ref="playBtn">
+        <div class="play" v-show="songs.length > 0" ref="playBtn" @click="random">
           <i class="icon-play"></i>
           <span class="text">随机播放全部</span>
         </div>
@@ -16,7 +16,7 @@
     <div class="bg-layer" ref="layer"></div>
     <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list @select="selectItem" :songs="songs"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -30,12 +30,15 @@ import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
 import {prefixStyle} from 'common/js/dom'
 import Loading from 'base/loading/loading'
+import {mapActions} from 'vuex'
+import {playlistMixin} from 'common/js/mixin'
 
 const RESERVER_HEIGHT = 40
 const transform = prefixStyle('transform')
 const backdrop = prefixStyle('backdrop')
 
 export default{
+  mixins: [playlistMixin],
   props: {
     bgImage: {
       type: String,
@@ -65,12 +68,32 @@ export default{
     this.listenScroll = true // 监听滚动
   },
   methods: {
+    handlePlaylist (playlist) { // 底部播放器适配
+      const bottom = playlist.length > 0 ? '60px' : ''
+      this.$refs.list.$el.style.bottom = bottom
+      this.$refs.list.refresh()
+    },
     scroll (pos) {
       this.scrollY = pos.y
     },
     back () { // 返回上一个页面
       this.$router.back()
-    }
+    },
+    selectItem (item, index) {
+      this.selectPlay({
+        list: this.songs,
+        index
+      })
+    },
+    random () {
+      this.randomPlay({
+        list: this.songs
+      })
+    },
+    ...mapActions([
+      'selectPlay',
+      'randomPlay'
+    ])
   },
   mounted () { // 给歌手图片设置高度
     this.imageHeight = this.$refs.bgImage.clientHeight
@@ -85,10 +108,10 @@ export default{
       let blur = 0
       this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`
       const percent = Math.abs(newY / this.imageHeight)
-      if (newY > 0) {// 设置图片缩放
+      if (newY > 0) { // 设置图片缩放
         scale = 1 + percent
         zIndex = 10
-      }else { // 设置图片模糊
+      } else { // 设置图片模糊
         blur = Math.min(20 * percent, 20)
       }
       this.$refs.filter.style[backdrop] = `blur(${blur}px)`

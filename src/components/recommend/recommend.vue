@@ -41,6 +41,7 @@ import {getRecommend, getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
 import Slider from 'base/slider/slider'
 import {playlistMixin} from 'common/js/mixin'
+import {mapMutations} from 'vuex'
 
 export default {
   mixins: [playlistMixin],
@@ -64,6 +65,7 @@ export default {
       this.$router.push({ // 跳转到歌单详情
         path: `/recommend/${item.dissid}`
       })
+      this.setDisc(item)
     },
     _getRecommend () {
       getRecommend().then((res) => {
@@ -84,7 +86,10 @@ export default {
         this.$refs.scroll.refresh()
         this.checkLoaded = true
       }
-    }
+    },
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    })
   },
   components: {
     Slider, // 轮播图

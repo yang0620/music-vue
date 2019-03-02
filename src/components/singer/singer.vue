@@ -1,6 +1,6 @@
 <template>
   <div class="singer" ref="singer">
-    <list-view @select="selectSinger" :data="singers"></list-view>
+    <list-view ref="list" @select="selectSinger" :data="singers"></list-view>
     <router-view></router-view>
   </div>
 </template>
@@ -30,7 +30,6 @@ export default {
     handlePlaylist (playlist) { // 底部播放器适配
       const bottom = playlist.length > 0 ? '60px' : ''
       this.$refs.singer.style.bottom = bottom
-      this.$refs.list.refresh()
     },
     selectSinger (singer) { // 根据id进行路由跳转
       this.$router.push({
